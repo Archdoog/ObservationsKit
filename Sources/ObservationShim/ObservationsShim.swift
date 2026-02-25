@@ -15,12 +15,12 @@ import _Concurrency
 @usableFromInline
 @_silgen_name("swift_task_addCancellationHandler")
 func _taskAddCancellationHandler(handler: () -> Void)
-  -> UnsafeRawPointer /*CancellationNotificationStatusRecord*/
+  -> UnsafeRawPointer
 
 @usableFromInline
 @_silgen_name("swift_task_removeCancellationHandler")
 func _taskRemoveCancellationHandler(
-  record: UnsafeRawPointer /*CancellationNotificationStatusRecord*/
+  record: UnsafeRawPointer
 )
 
 func withIsolatedTaskCancellationHandler<T: Sendable>(

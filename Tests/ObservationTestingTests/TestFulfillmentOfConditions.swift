@@ -45,10 +45,10 @@ struct TestFillmentOfConditions {
       #expect(
         error
           == .timedOutWith(
-            condition: "ObservationTestingTests/TestFulfillmentOfConditions.swift:28"))
+            condition: "ObservationTestingTests/TestFulfillmentOfConditions.swift:36"))
       #expect(
         error.localizedDescription
-          == "Timed out because condition at ObservationTestingTests/TestFulfillmentOfConditions.swift:28 unmet"
+          == "Timed out because condition at ObservationTestingTests/TestFulfillmentOfConditions.swift:36 unmet"
       )
 
       let duration = Date().timeIntervalSince(executionStart)
