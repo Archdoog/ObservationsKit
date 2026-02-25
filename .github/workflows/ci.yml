@@ -29,25 +29,20 @@ jobs:
         include:
           - name: "iOS"
             destination: "platform=iOS Simulator,name=iPhone 16,OS=26.2"
-            action: test
           - name: "macOS"
             destination: "platform=macOS"
-            action: test
           - name: "Mac Catalyst"
             destination: "platform=macOS,variant=Mac Catalyst"
-            action: test
           - name: "tvOS"
             destination: "platform=tvOS Simulator,name=Apple TV,OS=26.2"
-            action: test
           - name: "visionOS"
             destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.2"
-            action: test
           - name: "watchOS"
             destination: "platform=watchOS Simulator,name=Apple Watch Series 10 (46mm),OS=26.2"
-            action: build
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Build & Test
         run: |
-          xcodebuild ${{ matrix.action }} -scheme ObservationKit -destination '${{ matrix.destination }}'
+          xcodebuild ${{ matrix.action }} -scheme ObservationKit-Package -destination '${{ matrix.destination }}'
