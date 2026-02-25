@@ -28,7 +28,7 @@ jobs:
       matrix:
         include:
           - name: "iOS"
-            destination: "platform=iOS Simulator,name=iPhone 16,OS=26.2"
+            destination: "platform=iOS Simulator,name=iPhone 17 Pro Max,OS=26.2"
           - name: "macOS"
             destination: "platform=macOS"
           - name: "Mac Catalyst"
