@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Swift Format
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Formatting
+        run: swift format lint --strict --parallel --recursive Sources Tests
+
+  build-and-test:
+    name: ${{ matrix.name }}
+    runs-on: macos-26
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "iOS"
+            destination: "platform=iOS Simulator,name=iPhone 17 Pro Max,OS=26.2"
+          - name: "macOS"
+            destination: "platform=macOS"
+          - name: "Mac Catalyst"
+            destination: "platform=macOS,variant=Mac Catalyst"
+          - name: "tvOS"
+            destination: "platform=tvOS Simulator,name=Apple TV,OS=26.2"
+          - name: "visionOS"
+            destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.2"
+          - name: "watchOS"
+            destination: "platform=watchOS Simulator,name=Apple Watch Series 11 (46mm),OS=26.2"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build & Test
+        run: |
+          xcodebuild ${{ matrix.action }} -scheme ObservationKit-Package -destination '${{ matrix.destination }}'
