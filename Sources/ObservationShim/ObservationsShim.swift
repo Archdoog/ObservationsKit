@@ -14,7 +14,8 @@ import _Concurrency
 
 @usableFromInline
 @_silgen_name("swift_task_addCancellationHandler")
-func _taskAddCancellationHandler(handler: () -> Void) -> UnsafeRawPointer /*CancellationNotificationStatusRecord*/
+func _taskAddCancellationHandler(handler: () -> Void)
+  -> UnsafeRawPointer /*CancellationNotificationStatusRecord*/
 
 @usableFromInline
 @_silgen_name("swift_task_removeCancellationHandler")
@@ -111,7 +112,10 @@ public struct ObservationsShim<Element: Sendable, Failure: Error>: AsyncSequence
 
     // install a willChange continuation into the set of continuations
     // this must take a locally unique id (to the active calls of next)
-    static func willChange(isolation iterationIsolation: isolated (any Actor)? = #isolation, state: _ManagedCriticalState<State>, id: Int) async {
+    static func willChange(
+      isolation iterationIsolation: isolated (any Actor)? = #isolation,
+      state: _ManagedCriticalState<State>, id: Int
+    ) async {
       return await withUnsafeContinuation(isolation: iterationIsolation) { continuation in
         state.withCriticalRegion { state in
           defer {
@@ -198,7 +202,10 @@ public struct ObservationsShim<Element: Sendable, Failure: Error>: AsyncSequence
 
     // this is the primary implementation of the tracking
     // it is bound to be called on the specified isolation of the construction
-    fileprivate static func trackEmission(isolation trackingIsolation: isolated (any Actor)?, state: _ManagedCriticalState<State>, emit: Emit) throws(Failure) -> Iteration {
+    fileprivate static func trackEmission(
+      isolation trackingIsolation: isolated (any Actor)?, state: _ManagedCriticalState<State>,
+      emit: Emit
+    ) throws(Failure) -> Iteration {
       // this ferries in an intermediate form with Result to skip over `withObservationTracking` not handling errors being thrown
       // particularly this case is that the error is also an iteration state transition data point (it terminates the sequence)
       // so we need to hold that to get a chance to catch and clean-up
@@ -216,7 +223,9 @@ public struct ObservationsShim<Element: Sendable, Failure: Error>: AsyncSequence
       return try result.get()
     }
 
-    fileprivate mutating func terminate(throwing failure: Failure? = nil, id: Int) throws(Failure) -> Element? {
+    fileprivate mutating func terminate(throwing failure: Failure? = nil, id: Int) throws(Failure)
+      -> Element?
+    {
       // this is purely defensive to any leaking out of iteration generation ids
       state?.withCriticalRegion { state in
         state.continuations.removeValue(forKey: id)
@@ -230,7 +239,10 @@ public struct ObservationsShim<Element: Sendable, Failure: Error>: AsyncSequence
       }
     }
 
-    fileprivate mutating func trackEmission(isolation iterationIsolation: isolated (any Actor)?, state: _ManagedCriticalState<State>, id: Int) async throws(Failure) -> Element? {
+    fileprivate mutating func trackEmission(
+      isolation iterationIsolation: isolated (any Actor)?, state: _ManagedCriticalState<State>,
+      id: Int
+    ) async throws(Failure) -> Element? {
       guard !Task.isCancelled else {
         // the task was cancelled while awaiting a willChange so ensure a proper termination
         return try terminate(id: id)
@@ -246,7 +258,9 @@ public struct ObservationsShim<Element: Sendable, Failure: Error>: AsyncSequence
       try await next(isolation: #isolation)
     }
 
-    public mutating func next(isolation iterationIsolation: isolated (any Actor)?) async throws(Failure) -> Element? {
+    public mutating func next(isolation iterationIsolation: isolated (any Actor)?)
+      async throws(Failure) -> Element?
+    {
       // early exit if the sequence is terminal already
       guard let state else { return nil }
       // set up an id for this generation
@@ -264,12 +278,14 @@ public struct ObservationsShim<Element: Sendable, Failure: Error>: AsyncSequence
           // this will mean our next await for the emission will ensure the suspension return of the willChange context
           // back to the trailing edges of the mutations. In short, this enables the transactionality bounded by the
           // isolation of the mutation.
-          await withIsolatedTaskCancellationHandler(operation: {
-            await State.willChange(isolation: iterationIsolation, state: state, id: id)
-          }, onCancel: {
-            // ensure to clean out our continuation uon cancellation
-            State.cancel(state, id: id)
-          }, isolation: iterationIsolation)
+          await withIsolatedTaskCancellationHandler(
+            operation: {
+              await State.willChange(isolation: iterationIsolation, state: state, id: id)
+            },
+            onCancel: {
+              // ensure to clean out our continuation uon cancellation
+              State.cancel(state, id: id)
+            }, isolation: iterationIsolation)
           return try await trackEmission(isolation: iterationIsolation, state: state, id: id)
         }
       } catch {

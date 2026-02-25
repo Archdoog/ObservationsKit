@@ -13,19 +13,16 @@ concurrency:
 jobs:
   format:
     name: Swift Format
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
-
-      - name: Select Xcode 26.2
-        run: sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
 
       - name: Check Formatting
         run: swift format lint --strict --parallel --recursive Sources Tests
 
   build-and-test:
     name: ${{ matrix.name }}
-    runs-on: macos-15
+    runs-on: macos-26
     strategy:
       fail-fast: false
       matrix:
@@ -51,14 +48,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode 26.2
-        run: sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
-
       - name: Build & Test
-        env:
-          NSUnbufferedIO: "YES"
         run: |
-          set -o pipefail
-          xcodebuild ${{ matrix.action }} \
-            -scheme ObservationKit \
-            -destination '${{ matrix.destination }}'
+          xcodebuild ${{ matrix.action }} -scheme ObservationKit -destination '${{ matrix.destination }}'
