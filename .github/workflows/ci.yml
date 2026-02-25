@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Swift Format
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26.2
+        run: sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
+
+      - name: Check Formatting
+        run: swift format lint --strict --parallel --recursive Sources Tests
+
+  build-and-test:
+    name: ${{ matrix.name }}
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "iOS"
+            destination: "platform=iOS Simulator,name=iPhone 16,OS=26.2"
+            action: test
+          - name: "macOS"
+            destination: "platform=macOS"
+            action: test
+          - name: "Mac Catalyst"
+            destination: "platform=macOS,variant=Mac Catalyst"
+            action: test
+          - name: "tvOS"
+            destination: "platform=tvOS Simulator,name=Apple TV,OS=26.2"
+            action: test
+          - name: "visionOS"
+            destination: "platform=visionOS Simulator,name=Apple Vision Pro,OS=26.2"
+            action: test
+          - name: "watchOS"
+            destination: "platform=watchOS Simulator,name=Apple Watch Series 10 (46mm),OS=26.2"
+            action: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26.2
+        run: sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
+
+      - name: Build & Test
+        env:
+          NSUnbufferedIO: "YES"
+        run: |
+          set -o pipefail
+          xcodebuild ${{ matrix.action }} \
+            -scheme ObservationKit \
+            -destination '${{ matrix.destination }}'
