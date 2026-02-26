@@ -5,7 +5,7 @@
 //  Copyright (c) 2026 Jacob Fielding
 //
 
-extension AsyncSequence where Self: Sendable, Element: Sendable & Equatable {
+extension AsyncSequence where Self: Sendable, Element: Sendable {
 
   /// Fulfill a specific condition.
   ///
@@ -32,7 +32,7 @@ extension AsyncSequence where Self: Sendable, Element: Sendable & Equatable {
   }
 }
 
-extension AsyncSequence where Self: Sendable, Element: Sendable & Equatable {
+extension AsyncSequence where Self: Sendable, Element: Sendable {
 
   func processCondition(
     condition: @Sendable @isolated(any) @escaping (Element?) async throws -> Bool,
