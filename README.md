@@ -18,10 +18,10 @@ This example shows how you'd effectively erase the official and shimmed backport
 was used to allow erasure into a clean `AsyncStream<Element>`.
 
 ```swift
-func observableStream(
-    _ emit: @escaping @isolated(any) @Sendable () -> Element
+func observe<Element: Sendable>(
+    @_inheritActorContext _ emit: @escaping @isolated(any) @Sendable () -> Element,
 ) -> AsyncStream<Element> {
-    if #available(iOS 26.0, *) {
+    if #available(iOS 26.0, macOS 26.0, tvOS 26.0, watchOS 26.0,visionOS 26.0, *) {
         let official = Observations(emit)
         return AsyncStream(official)
     } else {
